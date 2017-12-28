@@ -8,6 +8,8 @@ do_image_ostree[depends] = "ostree-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
 
+#                        ostree-push-native:do_populate_sysroot
+
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
@@ -154,8 +156,10 @@ IMAGE_CMD_ostree () {
            --skip-if-unchanged \
            --branch=${OSTREE_BRANCHNAME} \
            --subject="Commit-id: ${IMAGE_NAME}"
-
     rm -rf ${OSTREE_ROOTFS}
+
+	# Push to the server
+#	ostree-push -v --debug --repo=${OSTREE_REPO} ostree-push@127.0.0.1:repo_build/
 }
 
 IMAGE_TYPEDEP_ostreepush = "ostree"
