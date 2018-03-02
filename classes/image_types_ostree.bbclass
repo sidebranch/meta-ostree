@@ -155,7 +155,8 @@ IMAGE_CMD_ostree () {
            --tree=dir=${OSTREE_ROOTFS} \
            --skip-if-unchanged \
            --branch=${OSTREE_BRANCHNAME} \
-           --subject="Commit-id: ${IMAGE_NAME}"
+           --subject="yocto-build: ${IMAGE_NAME}" \
+           --body="Build-meta-rev: `git describe --tags --dirty --always`\nBuildhost: `uname -a`"
     rm -rf ${OSTREE_ROOTFS}
 
 	# Push to the server
