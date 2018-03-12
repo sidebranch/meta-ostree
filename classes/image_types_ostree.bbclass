@@ -162,23 +162,3 @@ IMAGE_CMD_ostree () {
 	# Push to the server
 #	ostree-push -v --debug --repo=${OSTREE_REPO} ostree-push@127.0.0.1:repo_build/
 }
-
-IMAGE_TYPEDEP_ostreepush = "ostree"
-do_image_ostreepush[depends] = "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot "
-IMAGE_CMD_ostreepush () {
-    # Print warnings if credetials are not set or if the file has not been found.
-    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
-        if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-            garage-push --repo=${OSTREE_REPO} \
-                        --ref=${OSTREE_BRANCHNAME} \
-                        --credentials=${SOTA_PACKED_CREDENTIALS} \
-                        --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
-        else
-            bbwarn "SOTA_PACKED_CREDENTIALS file does not exist."
-        fi
-    else
-        bbwarn "SOTA_PACKED_CREDENTIALS not set. Please add SOTA_PACKED_CREDENTIALS."
-    fi
-}
-
-# vim:set ts=4 sw=4 sts=4 expandtab:
