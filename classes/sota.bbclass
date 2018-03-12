@@ -30,5 +30,3 @@ SOTA_MACHINE_imx7d-phyboard-zeta-001 ?= "imx7-phytec-zeta"
 SOTA_MACHINE_imx7d-phyboard-zeta-002 ?= "imx7-phytec-zeta"
 
 inherit sota_${SOTA_MACHINE}
-
-inherit image_repo_manifest
