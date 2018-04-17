@@ -1,4 +1,6 @@
 #!/bin/sh
+mount -t devtmpfs none /dev
+sleep 1
 set -eu
 
 # -------------------------------------------
@@ -38,7 +40,7 @@ log_info "Starting OSTree initrd script"
 
 do_mount_fs proc /proc
 do_mount_fs sysfs /sys
-do_mount_fs devtmpfs /dev
+#do_mount_fs devtmpfs /dev
 do_mount_fs devpts /dev/pts
 do_mount_fs tmpfs /dev/shm
 do_mount_fs tmpfs /tmp
@@ -74,12 +76,14 @@ done
 
 # switch to new rootfs
 log_info "Switching to new rootfs"
-mkdir -p run/initramfs
+#mkdir -p run/initramfs
 
-pivot_root . run/initramfs || bail_out "pivot_root failed."
+exec switch_root /sysroot /sbin/init
 
-log_info "Launching target init"
-
-exec chroot . sh -c 'umount /run/initramfs; exec /sbin/init' \
-	  <dev/console >dev/console 2>&1
+#pivot_root . run/initramfs || bail_out "pivot_root failed."
+#
+#log_info "Launching target init"
+#
+#exec chroot . sh -c 'umount /run/initramfs; exec /sbin/init' \
+#	  <dev/console >dev/console 2>&1
 

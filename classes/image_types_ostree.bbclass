@@ -8,8 +8,6 @@ do_image_ostree[depends] = "ostree-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
 
-#                        ostree-push-native:do_populate_sysroot
-
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
@@ -131,7 +129,9 @@ IMAGE_CMD_ostree () {
     checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
     cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
-    cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT} boot/initramfs-${checksum}
+    if [ ! -n "${INITRAMFS_IMAGE_BUNDLE}" ]; then
+        cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT} boot/initramfs-${checksum}
+    fi
 
     # Copy image manifest
     cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest

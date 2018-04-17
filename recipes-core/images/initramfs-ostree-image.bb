@@ -1,6 +1,8 @@
 # Netboot initramfs image.
 DESCRIPTION = "OSTree initramfs image"
 
+USE_DEVFS = "0"
+
 PACKAGE_INSTALL = "ostree-switchroot ostree-initrd busybox base-passwd ${ROOTFS_BOOTSTRAP_INSTALL}"
 
 SYSTEMD_DEFAULT_TARGET = "initrd.target"
@@ -13,8 +15,7 @@ IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"
 
-IMAGE_FSTYPES = "ext4.gz"
-IMAGE_FSTYPES_append_arm = " ext4.gz.u-boot"
+IMAGE_FSTYPES = "cpio.gz"
 
 inherit core-image
 
