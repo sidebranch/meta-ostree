@@ -1,6 +1,6 @@
 #!/bin/sh
 mount -t devtmpfs none /dev
-sleep 1
+sleep 5
 set -eu
 
 # -------------------------------------------
