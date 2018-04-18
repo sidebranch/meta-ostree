@@ -1,6 +1,4 @@
 #!/bin/sh
-mount -t devtmpfs none /dev
-sleep 5
 set -eu
 
 # -------------------------------------------
@@ -40,7 +38,7 @@ log_info "Starting OSTree initrd script"
 
 do_mount_fs proc /proc
 do_mount_fs sysfs /sys
-#do_mount_fs devtmpfs /dev
+do_mount_fs devtmpfs /dev
 do_mount_fs devpts /dev/pts
 do_mount_fs tmpfs /dev/shm
 do_mount_fs tmpfs /tmp
