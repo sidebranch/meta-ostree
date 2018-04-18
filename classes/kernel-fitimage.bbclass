@@ -439,18 +439,27 @@ addtask assemble_fitimage before do_install after do_compile
 
 do_assemble_fitimage_initramfs() {
 	if echo ${KERNEL_IMAGETYPES} | grep -wq "fitImage" && \
-		test -n "${INITRAMFS_IMAGE}"; then
+		test -n "${INITRAMFS_IMAGE}" && \
+		test ! -n "${INITRAMFS_IMAGE_BUNDLE}"; then
 
 		cd ${B}
-		if test -n "${INITRAMFS_IMAGE_BUNDLE}"; then
-			fitimage_assemble fit-image-${INITRAMFS_IMAGE}.its fitImage-${INITRAMFS_IMAGE}
-		else
-			fitimage_assemble fit-image-${INITRAMFS_IMAGE}.its fitImage-${INITRAMFS_IMAGE} 1
-		fi
+		fitimage_assemble fit-image-${INITRAMFS_IMAGE}.its fitImage-${INITRAMFS_IMAGE} 1
 	fi
 }
 
 addtask assemble_fitimage_initramfs before do_deploy after do_install
+
+do_assemble_fitimage_bundled_initramfs() {
+	if echo ${KERNEL_IMAGETYPES} | grep -wq "fitImage" && \
+		test -n "${INITRAMFS_IMAGE}" && \
+		test -n "${INITRAMFS_IMAGE_BUNDLE}"; then
+
+		cd ${B}
+		fitimage_assemble fit-image-${INITRAMFS_IMAGE}.its fitImage-${INITRAMFS_IMAGE}
+	fi
+}
+
+addtask assemble_fitimage_bundled_initramfs before do_deploy after do_bundle_initramfs
 
 
 kernel_do_deploy[vardepsexclude] = "DATETIME"
