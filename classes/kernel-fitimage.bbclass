@@ -235,7 +235,6 @@ EOF
 # $4 ... ramdisk ID
 # $5 ... config ID
 # $6 ... default flag
-# $7 ... config ID
 fitimage_emit_section_config() {
 
 	conf_csum="sha1"
@@ -272,7 +271,7 @@ fitimage_emit_section_config() {
 
 	cat << EOF >> ${1}
                 ${default_line}
-                conf@${7} {
+                conf@${3} {
 			description = "${6} ${conf_desc}";
 			${kernel_line}
 			${fdt_line}
@@ -399,7 +398,7 @@ fitimage_assemble() {
 	if [ -n "${DTBS}" ]; then
 		i=1
 		for DTB in ${DTBS}; do
-			fitimage_emit_section_config ${1} "${kernelcount}" "${DTB}" "${ramdiskcount}" "${setupcount}" "`expr ${i} = ${dtbcount}`" "`expr ${i} - 1`"
+			fitimage_emit_section_config ${1} "${kernelcount}" "${DTB}" "${ramdiskcount}" "${setupcount}" "`expr ${i} = ${dtbcount}`"
 			i=`expr ${i} + 1`
 		done
 	fi
