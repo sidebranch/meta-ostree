@@ -17,7 +17,7 @@ do_install () {
     touch ${D}${sysconfdir}/fstab
 }
 
-FILES_${PN} = "${sysconfdir}/init.d/ostree /dev /proc /sys /home"
+FILES_${PN} = "${sysconfdir} /dev /proc /sys /home"
 
 INITSCRIPT_NAME = "ostree"
 INITSCRIPT_PARAMS = "defaults"
