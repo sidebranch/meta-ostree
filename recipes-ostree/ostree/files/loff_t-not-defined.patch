@@ -1,0 +1,15 @@
+Index: libostree-2018.8/libglnx/glnx-missing-syscall.h
+===================================================================
+--- libostree-2018.8.orig/libglnx/glnx-missing-syscall.h
++++ libostree-2018.8/libglnx/glnx-missing-syscall.h
+@@ -30,6 +30,10 @@
+    Add abstraction model for BPF programs
+ */
+ 
++#ifndef loff_t
++#define loff_t off_t
++#endif
++
+ #include "config.h"
+ 
+ #if !HAVE_DECL_RENAMEAT2

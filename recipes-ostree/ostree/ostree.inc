@@ -6,20 +6,56 @@ inherit autotools-brokensep pkgconfig systemd gobject-introspection
 
 INHERIT_remove_class-native = "systemd"
 
-SRC_URI = "https://github.com/ostreedev/ostree/releases/download/v${PV}/libostree-${PV}.tar.xz"
+SRC_URI = "\
+https://github.com/ostreedev/ostree/releases/download/v${PV}/libostree-${PV}.tar.xz \
+file://missing-TEMP_FAILURE_RETRY.patch \
+file://loff_t-not-defined.patch \
+"
 
 S = "${WORKDIR}/libostree-${PV}"
 
 BBCLASSEXTEND = "native"
 
-DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs gtk-doc-native curl xz"
+#DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs gtk-doc-native curl xz"
+#DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme fuse libsoup-2.4 e2fsprogs gtk-doc-native curl xz"
+#DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme fuse libsoup-2.4 e2fsprogs curl xz"
+#
+DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme fuse e2fsprogs curl xz"
+
+DEPENDS_append_class-native = " libarchive"
+
 DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
 DEPENDS_remove_class-native = "systemd-native"
 
-RDEPENDS_${PN} = "util-linux-libuuid util-linux-libblkid util-linux-libmount libcap bash"
+RDEPENDS_${PN} = "util-linux-libuuid util-linux-libblkid util-linux-libmount libcap"
 
-EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl"
-EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
+# for tests only
+#RDEPENDS_${PN} += "bash"
+
+# works
+#EXTRA_OECONF = "--with-static-compiler='${CC}' --without-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl --without-soup --disable-glibtest --enable-introspection=no --without-avahi"
+EXTRA_OECONF = "--without-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl --without-soup --disable-glibtest --enable-introspection=no --without-avahi"
+EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat --with-libarchive"
+EXTRA_OECONF_remove_class-native = " --without-libarchive"
+
+# if no ostree initramfs is used, the switch runs as init PID #1, but cannot load libraries
+python __anonymous () {
+    image = d.getVar('OSTREE_INITRAMFS_IMAGE')
+    if not image:
+        d.appendVar("EXTRA_OECONF", " --with-static-compiler='${CC}'")
+}
+
+
+# Do not generate documentation
+#EXTRA_OECONF =              "--disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
+#EXTRA_OECONF_class-native = "--disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
+#
+# Target: static ostree-switch executable, no archive support, no SMACK, no GRUB, use curl instead of soup
+#EXTRA_OECONF +=  "--with-static-compiler --without-libarchive --without-smack --without-builtin-grub2-mkconfig --with-curl --without-soup"
+#
+# Host: Enabled both archive support and pseudo support required under OpenEmbedded/Yocto
+#EXTRA_OECONF_class-native += "--with-libarchive --without-smack --without-builtin-grub2-mkconfig --with-curl --without-soup --enable-wrpseudo-compat"
+#
 
 # Path to ${prefix}/lib/ostree/ostree-grub-generator is hardcoded on the
 #  do_configure stage so we do depend on it
@@ -60,6 +96,7 @@ do_install_append() {
   install -p -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
   install -p -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
  fi
+ rm -rf ${D}${datadir}/bash-completion
 }
 
 do_install_append_class-native() {
@@ -75,9 +112,12 @@ FILES_${PN} += " \
     ${libdir}/girepository-1.0 \
     ${libdir}/girepository-1.0/OSTree-1.0.typelib \
     ${libdir}/tmpfiles.d/ostree-tmpfiles.conf \
-    ${datadir}/bash-completion/completions/ostree \
     ${systemd_unitdir}/system-generators/ostree-system-generator \
 "
+
+#
+#    ${datadir}/bash-completion/completions/ostree \
+#
 
 PACKAGES =+ "${PN}-switchroot"
 
@@ -85,3 +125,8 @@ FILES_${PN}-switchroot = "${libdir}/ostree/ostree-prepare-root"
 RDEPENDS_${PN}-switchroot = ""
 DEPENDS_remove_class-native = "systemd-native"
 
+do_workaround_usrmerge_recipe_sysroot () {
+    ln -snf usr/lib ${RECIPE_SYSROOT}/lib
+}
+
+addtask do_workaround_usrmerge_recipe_sysroot after do_prepare_recipe_sysroot before do_configure

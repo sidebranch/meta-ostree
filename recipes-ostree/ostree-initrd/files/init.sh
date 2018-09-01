@@ -36,6 +36,8 @@ export PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/lib/ostree
 
 log_info "Starting OSTree initrd script"
 
+exit
+
 do_mount_fs proc /proc
 do_mount_fs sysfs /sys
 do_mount_fs devtmpfs /dev

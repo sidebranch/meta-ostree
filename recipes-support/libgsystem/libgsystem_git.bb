@@ -2,7 +2,7 @@ SUMMARY = "GIO-based library, targeted primarily for use by operating system com
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 
-SRC_URI = "gitsm://github.com/GNOME/libgsystem.git"
+SRC_URI = "gitsm://github.com/GNOME/libgsystem.git file://missing-TEMP_FAILURE_RETRY.patch"
 SRCREV="d606bec68ddfea78de4b03c3f3568afb71bdc1ce"
 
 S = "${WORKDIR}/git"

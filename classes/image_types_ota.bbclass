@@ -32,7 +32,7 @@ calculate_size () {
 	fi
 
 	if [ "$SIZE" -lt "$MIN" ]; then
-		$SIZE=$MIN
+		SIZE=$MIN
 	fi
 
 	SIZE=`expr $SIZE \+ $EXTRA`
@@ -71,6 +71,7 @@ IMAGE_CMD_otaimg () {
 		PHYS_SYSROOT=`mktemp -d ${WORKDIR}/ota-sysroot-XXXXX`
 
 		ostree admin --sysroot=${PHYS_SYSROOT} init-fs ${PHYS_SYSROOT}
+
 		ostree admin --sysroot=${PHYS_SYSROOT} os-init ${OSTREE_OSNAME}
 
 		mkdir -p ${PHYS_SYSROOT}/boot/loader.0
@@ -78,29 +79,34 @@ IMAGE_CMD_otaimg () {
 
 		if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
 			mkdir -p ${PHYS_SYSROOT}/boot/grub2
-			touch ${PHYS_SYSROOT}/boot/grub2/grub.cfg
+			ln -s ../loader/grub.cfg ${PHYS_SYSROOT}/boot/grub2/grub.cfg
 		elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
 			touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
 		else
 			bberror "Invalid bootloader: ${OSTREE_BOOTLOADER}"
 		fi;
 
-		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${OSTREE_BRANCHNAME}
+		ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+
+		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
+
 		export OSTREE_BOOT_PARTITION="/boot"
 		kargs_list=""
 		for arg in ${OSTREE_KERNEL_ARGS}; do
 			kargs_list="${kargs_list} --karg-append=$arg"
 		done
 
-		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_BRANCHNAME}
+		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${ostree_target_hash}
 
 		# Copy deployment /home and /var/sota to sysroot
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
-		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota ./var/local || true
+		${IMAGE_CMD_TAR} --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar ./usr/homedirs ./var/sota ./var/local || true
 		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		# Create /var/sota if it doesn't exist yet
 		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
+		# Ensure the permissions are correctly set
+		chmod 700 ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
@@ -123,6 +129,7 @@ IMAGE_CMD_otaimg () {
 		sync
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$COUNT bs=1024
 		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -L otaroot -d ${PHYS_SYSROOT}
+		${IMAGE_CMD_TAR} --xattrs --xattrs-include='*' -C ${PHYS_SYSROOT} -cf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.post.tar .
 		rm -rf ${PHYS_SYSROOT}
 
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
