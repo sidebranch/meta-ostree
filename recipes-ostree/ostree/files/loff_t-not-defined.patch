@@ -1,7 +1,16 @@
-Index: libostree-2018.8/libglnx/glnx-missing-syscall.h
-===================================================================
---- libostree-2018.8.orig/libglnx/glnx-missing-syscall.h
-+++ libostree-2018.8/libglnx/glnx-missing-syscall.h
+From 0f1dd8a000261489077945774531ca6c2d54a747 Mon Sep 17 00:00:00 2001
+From: Leon Woestenberg <leon@sidebranch.com>
+Date: Sat, 1 Sep 2018 13:48:14 +0200
+
+Signed-off-by: Leon Woestenberg <leon@sidebranch.com>
+---
+ libglnx/glnx-missing-syscall.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/libglnx/glnx-missing-syscall.h b/libglnx/glnx-missing-syscall.h
+index 4876ca3..ffe4133 100644
+--- a/libglnx/glnx-missing-syscall.h
++++ b/libglnx/glnx-missing-syscall.h
 @@ -30,6 +30,10 @@
     Add abstraction model for BPF programs
  */

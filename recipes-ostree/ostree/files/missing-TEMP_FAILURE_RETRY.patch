@@ -1,7 +1,16 @@
-Index: libostree-2018.8/libglnx/glnx-macros.h
-===================================================================
---- libostree-2018.8.orig/libglnx/glnx-macros.h
-+++ libostree-2018.8/libglnx/glnx-macros.h
+From 6848d03eb89cae67c622ba196dfb86a44ef43647 Mon Sep 17 00:00:00 2001
+From: Leon Woestenberg <leon@sidebranch.com>
+Date: Sat, 1 Sep 2018 13:48:14 +0200
+
+Signed-off-by: Leon Woestenberg <leon@sidebranch.com>
+---
+ libglnx/glnx-macros.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/libglnx/glnx-macros.h b/libglnx/glnx-macros.h
+index 6d8aca9..700fc75 100644
+--- a/libglnx/glnx-macros.h
++++ b/libglnx/glnx-macros.h
 @@ -31,6 +31,16 @@ G_BEGIN_DECLS
  /* All of these are for C only. */
  #ifndef __GI_SCANNER__
